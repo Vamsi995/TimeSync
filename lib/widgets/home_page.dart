@@ -193,7 +193,7 @@ class _HomeState extends State<Home> {
 
       int totalTime = await getDailyUsage();
 
-      if(DateTime.now().difference(startToday) < Duration(minutes: 15)) {
+      if(diff < Duration(minutes: 15)) {
         Vault.dailySaving();
         CloudUser user = await DataBaseService().getUserDetails();
         if(!LocalUser.normal && user.isAddict) {
