@@ -60,7 +60,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "Helper",
           body:
-          "Helper is the partner whom you choose at registration. The Helper has the freedom to accept, deny, or change the requested amount of time-based on your need and thus allowing you to use your apps again. The help seeker hasto repay the amount requested by cutting down screentime on some other day. ",
+              "Helper is the partner whom you choose at registration. The Helper has the freedom to accept, deny, or change the requested amount of time-based on your need and thus allowing you to use your apps again. The help seeker hasto repay the amount requested by cutting down screentime on some other day. ",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
