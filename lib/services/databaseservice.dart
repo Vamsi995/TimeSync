@@ -1,7 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_app/globalvars.dart';
+import 'package:flutter_app/models/AuthUser.dart';
 import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/LocalUser.dart';
+import 'package:flutter_app/services/authservice.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 
 class DataBaseService {
@@ -43,7 +45,8 @@ class DataBaseService {
         transaction: TimeRequest.toRequest(user.get("transaction")),
         deadline: deadline,
         allTransactions: allTransactions,
-        dailyLimit: user.get("dailyLimit"));
+        dailyLimit: user.get("dailyLimit"),
+        photoURL: user.get("photoURL"));
   }
 
   Stream<DocumentSnapshot> get userDetails {
@@ -58,6 +61,7 @@ class DataBaseService {
   }
 
   Future addFirstUser(String name, String uid) async {
+    AuthUser user = AuthService().getCurrentUser();
     return await socialCollection.doc(uid).set({
       'uid': uid,
       'name': name,
@@ -70,12 +74,14 @@ class DataBaseService {
       "deadline": DateTime.now(),
       "allTransactions": [],
       "trophies": 0,
-      "dailyLimit": 0
+      "dailyLimit": 0,
+      "photoURL": user.photoURL
     });
   }
 
   Future addFriend(String fname, String name) async {
     QuerySnapshot users = await socialCollection.get();
+    AuthUser user = AuthService().getCurrentUser();
     QueryDocumentSnapshot friend = users.docs.singleWhere((element) => element.get("name") == fname);
     await socialCollection.doc(uid).set({
       'uid': uid,
@@ -89,7 +95,8 @@ class DataBaseService {
       "deadline": DateTime.now(),
       "allTransactions": [],
       "trophies": 0,
-      "dailyLimit": 0
+      "dailyLimit": 0,
+      "photoURL": user.photoURL
     });
     return socialCollection.doc(friend.id).update({'fuid': uid, 'fname': name});
   }

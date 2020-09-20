@@ -3,7 +3,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_app/globalvars.dart';
-import 'package:flutter_app/models/AuthUser.dart';
 import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
@@ -16,7 +15,6 @@ import 'custom.dart';
 import 'home_page.dart';
 
 const int FRIEND_VAULT_FACTOR = 10;
-
 
 class Profile extends StatefulWidget {
   @override
@@ -329,7 +327,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    AuthUser authUser = Provider.of<AuthUser>(context);
     user = DataBaseService().mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
     friend = Provider.of<CloudUser>(context);
     Controller c = Get.put(Controller());
@@ -354,7 +351,7 @@ class _ProfileState extends State<Profile> {
               Container(
                 height: 250,
                 width: 500,
-                child: authUser == null
+                child: user == null
                     ? Container()
                     : Column(
                         children: [
@@ -364,11 +361,11 @@ class _ProfileState extends State<Profile> {
                               radius: 50,
                               child: ClipOval(
                                 child: Image.network(
-                                  '${authUser.photoURL}',
+                                  '${user.photoURL}',
                                 ),
                               )),
                           SizedBox(height: 20),
-                          Text("${user.name}"),
+                          Text("${c.name}"),
                         ],
                       ),
                 decoration: BoxDecoration(

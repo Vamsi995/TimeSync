@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
-import 'package:flutter_app/main.dart';
 import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
@@ -11,9 +10,9 @@ import 'package:flutter_picker/flutter_picker.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+
 import '../globalvars.dart';
 import '../models/CloudUser.dart';
-import 'custom.dart';
 
 class Connect extends StatefulWidget {
   @override
@@ -85,8 +84,7 @@ class _ConnectState extends State<Connect> {
                 controller: _timeController,
                 readOnly: true,
                 style: TextStyle(fontSize: 25),
-                decoration: InputDecoration(
-                    icon: Icon(Icons.access_time), helperText: "Time in mins"),
+                decoration: InputDecoration(icon: Icon(Icons.access_time), helperText: "Time in mins"),
                 onChanged: (text) {
                   _time = int.parse(text);
                 },
@@ -97,9 +95,7 @@ class _ConnectState extends State<Connect> {
               TextField(
                 maxLength: 20,
                 style: TextStyle(fontSize: 25),
-                decoration: InputDecoration(
-                    icon: Icon(Icons.rate_review),
-                    helperText: "Enter the Remarks"),
+                decoration: InputDecoration(icon: Icon(Icons.rate_review), helperText: "Enter the Remarks"),
                 onChanged: (text) {
                   _remark = text;
                 },
@@ -117,10 +113,8 @@ class _ConnectState extends State<Connect> {
             FlatButton(
               child: Text("Request"),
               onPressed: () async {
-                await DataBaseService().writeRequest(TimeRequest(
-                    reason: _remark,
-                    reqAmount: _time,
-                    reqDate: DateTime.now()));
+                await DataBaseService()
+                    .writeRequest(TimeRequest(reason: _remark, reqAmount: _time, reqDate: DateTime.now()));
                 http.Response res = await NotificationService().sendTimeRequest(
                     "Your friend needs ${(_time ~/ 60)} hrs ${(_time % 60)} mins of additional time\nReason: $_remark",
                     "Time Request");
@@ -147,8 +141,7 @@ class _ConnectState extends State<Connect> {
 
   @override
   Widget build(BuildContext context) {
-    user = DataBaseService()
-        .mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
+    user = DataBaseService().mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
     friend = Provider.of<CloudUser>(context);
 
     Controller c = Get.put(Controller());
@@ -180,111 +173,113 @@ class _ConnectState extends State<Connect> {
           children: [
             Container(
               height: 200,
+              child: friend == null
+                  ? Container()
+                  : Column(
+                      children: [
+                        SizedBox(height: 20),
+                        CircleAvatar(
+                            backgroundColor: Colors.transparent,
+                            radius: 50,
+                            child: ClipOval(
+                              child: Image.network(
+                                '${friend.photoURL}',
+                              ),
+                            )),
+                        SizedBox(height: 20),
+                        Text("${c.name}"),
+                      ],
+                    ),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                 begin: Alignment.bottomLeft,
-                end: Alignment
-                    .topRight, // 10% of the width, so there are ten blinds.
-                colors: [
-                  const Color(0xFF21BEFE),
-                  const Color(0xFFD7F5FD)
-                ], // whitish to gray
+                end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
                 // tileMode: TileMode.repeated, // repeats the gradient over the canvas
               )),
             ),
-            Stack(
-                overflow: Overflow.visible,
-                alignment: Alignment.topCenter,
-                children: [
-                  Container(
-                    height: 300,
-                    color: Colors.white,
-                    child: Container(
-                      margin: EdgeInsets.fromLTRB(5, 35, 5, 20),
-                      child: ListView.builder(
-                        physics: AlwaysScrollableScrollPhysics(),
-                        controller: _controller,
-                        scrollDirection: Axis.vertical,
-                        padding: const EdgeInsets.all(8),
-                        itemCount: nums.length,
-                        itemBuilder: (BuildContext context, int index) {
-                          return ListTile(
-                            leading: CircleAvatar(
-                              child: Text("100"),
-                            ),
-                            trailing: CircleAvatar(
-                              child: Icon(Icons.check),
-                              backgroundColor: Colors.green,
-                            ),
-                            title: Text("The Remark, req amount"),
-                          );
-                        },
-                        // separatorBuilder: (BuildContext context, int index) => const Divider(),
-                      ),
-                    ),
+            Stack(overflow: Overflow.visible, alignment: Alignment.topCenter, children: [
+              Container(
+                height: 300,
+                color: Colors.white,
+                child: Container(
+                  margin: EdgeInsets.fromLTRB(5, 35, 5, 20),
+                  child: ListView.builder(
+                    physics: AlwaysScrollableScrollPhysics(),
+                    controller: _controller,
+                    scrollDirection: Axis.vertical,
+                    padding: const EdgeInsets.all(8),
+                    itemCount: nums.length,
+                    itemBuilder: (BuildContext context, int index) {
+                      return ListTile(
+                        leading: CircleAvatar(
+                          child: Text("100"),
+                        ),
+                        trailing: CircleAvatar(
+                          child: Icon(Icons.check),
+                          backgroundColor: Colors.green,
+                        ),
+                        title: Text("The Remark, req amount"),
+                      );
+                    },
+                    // separatorBuilder: (BuildContext context, int index) => const Divider(),
                   ),
-                  Positioned(
-                    top: -60,
-                    child: Container(
-                      height: 110,
-                      width: 370,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(7),
-                        boxShadow: [
-                          BoxShadow(color: Color(0xFF21BEFE), blurRadius: 7)
-                        ],
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                ),
+              ),
+              Positioned(
+                top: -60,
+                child: Container(
+                  height: 110,
+                  width: 370,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(7),
+                    boxShadow: [BoxShadow(color: Color(0xFF21BEFE), blurRadius: 7)],
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
                           Text(
                             "Vault",
                             style: TextStyle(color: Color(0xFFB4C1CA)),
                           ),
                           Text(
                             "20",
-                            style: TextStyle(
-                                color: Color(0xFF70D4FF), fontSize: 25),
+                            style: TextStyle(color: Color(0xFF70D4FF), fontSize: 25),
                           ),
-                            ],
-                          ),
-                          Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
                           Text(
                             "Friend Vault",
                             style: TextStyle(color: Color(0xFFB4C1CA)),
                           ),
                           Text(
                             "20",
-                            style: TextStyle(
-                                color: Color(0xFF70D4FF), fontSize: 25),
-                          ),
-                            ],
+                            style: TextStyle(color: Color(0xFF70D4FF), fontSize: 25),
                           ),
                         ],
                       ),
-                    ),
+                    ],
                   ),
-                ]),
+                ),
+              ),
+            ]),
             Container(
               margin: EdgeInsets.fromLTRB(0, 2, 0, 0),
               padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment
-                        .topRight, // 10% of the width, so there are ten blinds.
-                    colors: [
-                      const Color(0xFF21BEFE),
-                      const Color(0xFFD7F5FD)
-                    ], // whitish to gray
-                    // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-                  )),
+                begin: Alignment.bottomLeft,
+                end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+              )),
               child: Column(
                 children: [
                   Text("Your friend needs ${_getRequestTime(c.requestedAmount)} of extra time.",
@@ -352,7 +347,6 @@ class _ConnectState extends State<Connect> {
               ),
             )
           ],
-
         ),
       ),
     );
