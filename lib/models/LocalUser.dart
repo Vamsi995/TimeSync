@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:flutter_app/globalvars.dart';
 import 'package:flutter_app/models/CloudUser.dart';
@@ -46,4 +45,11 @@ class LocalUser {
     await LocalStorage.localStorage.setDouble("timeDecay", value);
   }
 
+  static bool get normal {
+    return LocalStorage.localStorage.getBool("normal");
+  }
+
+  static Future<void> setNormal(bool value) async {
+    await LocalStorage.localStorage.setBool("normal", value);
+  }
 }

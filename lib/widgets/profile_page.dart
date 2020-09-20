@@ -5,19 +5,21 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_app/globalvars.dart';
 import 'package:flutter_app/models/AuthUser.dart';
 import 'package:flutter_app/models/CloudUser.dart';
+import 'package:flutter_app/models/LocalUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
+import 'package:flutter_countdown_timer/countdown_timer.dart';
 import 'package:flutter_picker/Picker.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:flutter_countdown_timer/countdown_timer.dart';
 
 import 'custom.dart';
 import 'home_page.dart';
 
 const int FRIEND_VAULT_FACTOR = 10;
 
+enum Mode { normal, decay }
 
 class Profile extends StatefulWidget {
   @override
@@ -46,6 +48,7 @@ class _ProfileState extends State<Profile> {
   int endTime;
 
   Controller c = Get.put(Controller());
+  Mode mode = Mode.normal;
 
   final Map<DateTime, List> _ot = {
     DateTime(2020, 9, 14): ['4.5'],
@@ -106,124 +109,184 @@ class _ProfileState extends State<Profile> {
         }).showDialog(context);
   }
 
-  Widget theGoalSet(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              RadioListTile(
-                title: Text('Mode 1'),
-                value: c.normal,
-                groupValue: c.normal,
-                onChanged: (value) {
-                  setState(() {
-                    c.normal = value;
-                  });
-                },
-              ),
-              RadioListTile(
-                title: Text('Mode 2'),
-                value: !c.normal,
-                groupValue: c.normal,
-                onChanged: (value) {
-                  setState(() {
-                    c.normal = value;
-                  });
-                },
-              ),
-            ],
-          ),
-          TextField(
-            style: TextStyle(fontSize: 25),
-            controller: _timeController,
-            readOnly: true,
-            // maxLength: 10,
-            // keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              icon: Icon(Icons.access_time),
-              helperText:
-                  "Enter Daily Quota, max = ${prevAvg.floor()} hrs ${(60 * (prevAvg - prevAvg.floor())).ceil()} mins",
-            ),
-            onTap: () {
-              showPickerArray(context);
-            },
-            onChanged: (text) {
-              _time = double.parse(text).round();
-              setState(() {
-                valid = _time <= prevAvg * 60;
-              });
-            },
-          ),
-          TextField(
-            maxLength: 5,
-            style: TextStyle(fontSize: 25),
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(icon: Icon(Icons.view_week), helperText: "Enter the weeks to follow"),
-            onChanged: (text) {
-              _dur = int.parse(text);
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.red,
-                child: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    setState(() {
-                      _goal = true;
-                      Get.back();
-                    });
-                  },
+  Future<void> _showMyDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                SizedBox(height: 30),
+                Text(
+                  'What is Normal mode ?',
+                  style: TextStyle(fontWeight: FontWeight.w900),
                 ),
-              ),
-              Visibility(
-                visible: valid,
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.green,
-                  child: IconButton(
-                    icon: Icon(Icons.check),
-                    color: Colors.black,
-                    onPressed: () async {
-                      setState(() {
-                        _goal = true;
-                        DateTime now = DateTime.now();
-                        // _dDay = now.add(Duration(days: _dur * 7));
-                        _dDay = now.add(Duration(minutes: _dur));
-                        _diff = _dDay.difference(now);
-                        flag = false;
+                Text('Want to be ambitious? In choosing this mode the goal set by the user will be used as a strict '
+                    'daily limit for the set duration. time saved each day will be calculated on this limit.'),
+                SizedBox(height: 30),
+                Text(
+                  "What is Helper mode ?",
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                Text("Willpower is overrated !! if you want to set a goal that is difficult then this mode "
+                    "will help you to gradually ease into the set goal time starting from your previous average "
+                    "usage to desired goal usage in the set duration. You got this!   ")
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            FlatButton(
+              child: Text('Close'),
+              onPressed: () {
+                Get.back();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget theGoalSet(BuildContext context, StateSetter state) {
+    return Scaffold(
+        body: Container(
+      padding: const EdgeInsets.symmetric(horizontal: 43.0),
+      child: Container(
+        alignment: Alignment.center,
+        child: SingleChildScrollView(
+          // new line
+          child: Column(
+            mainAxisSize: MainAxisSize.max,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: <Widget>[
+                  new Radio(
+                    value: Mode.normal,
+                    activeColor: Colors.blue[900],
+                    groupValue: mode,
+                    onChanged: (value) {
+                      state(() {
+                        mode = value;
                       });
-                      CloudUser.setDeadline(_dDay);
-                      CloudUser.setDailyLimit(_time);
-                      DataBaseService().updateFriendVault(_dur * 7 * FRIEND_VAULT_FACTOR);
-                      if (!c.normal) {
-                        Vault.decayCompute(prevAvg, _dur);
-                      }
-                      Get.back();
                     },
                   ),
-                ),
+                  new Text(
+                    'Normal',
+                  ),
+                  new SizedBox(width: 30),
+                  new Radio(
+                    value: Mode.decay,
+                    activeColor: Colors.blue[900],
+                    groupValue: mode,
+                    onChanged: (value) {
+                      state(() {
+                        mode = value;
+                      });
+                    },
+                  ),
+                  new Text('Helper'),
+                  new SizedBox(width: 10),
+                  new FlatButton(
+                      onPressed: () {
+                        _showMyDialog();
+                      },
+                      splashColor: Colors.transparent,
+                      child: Icon(
+                        Icons.help_outline,
+                        size: 20,
+                      ))
+                ],
               ),
+              TextField(
+                style: TextStyle(fontSize: 25),
+                controller: _timeController,
+                readOnly: true,
+                // maxLength: 10,
+                // keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  icon: Icon(Icons.access_time),
+                  helperText:
+                      "Enter Daily Quota, max = ${prevAvg.floor()} hrs ${(60 * (prevAvg - prevAvg.floor())).ceil()} mins",
+                ),
+                onTap: () {
+                  showPickerArray(context);
+                },
+                onChanged: (text) {
+                  _time = double.parse(text).round();
+                  state(() {
+                    valid = _time <= prevAvg * 60;
+                  });
+                },
+              ),
+              TextField(
+                maxLength: 5,
+                style: TextStyle(fontSize: 25),
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(icon: Icon(Icons.view_week), helperText: "Enter the weeks to follow"),
+                onChanged: (text) {
+                  _dur = int.parse(text);
+                },
+              ),
+              SizedBox(
+                height: 30,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  CircleAvatar(
+                    radius: 25,
+                    backgroundColor: Colors.red,
+                    child: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        state(() {
+                          _goal = true;
+                          Get.back();
+                        });
+                      },
+                    ),
+                  ),
+                  Visibility(
+                    visible: valid,
+                    child: CircleAvatar(
+                      radius: 25,
+                      backgroundColor: Colors.green,
+                      child: IconButton(
+                        icon: Icon(Icons.check),
+                        color: Colors.black,
+                        onPressed: () async {
+                          setState(() {
+                            _goal = true;
+                            DateTime now = DateTime.now();
+                            // _dDay = now.add(Duration(days: _dur * 7));
+                            _dDay = now.add(Duration(minutes: _dur));
+                            _diff = _dDay.difference(now);
+                            flag = false;
+                          });
+                          CloudUser.setDeadline(_dDay);
+                          CloudUser.setDailyLimit(_time);
+                          DataBaseService().updateFriendVault(_dur * 7 * FRIEND_VAULT_FACTOR);
+                          c.normal = mode == Mode.normal;
+                          LocalUser.setNormal(c.normal);
+                          if (!c.normal) {
+                            Vault.decayCompute(prevAvg, _dur);
+                          }
+                          Get.back();
+                        },
+                      ),
+                    ),
+                  ),
+                ],
+              )
             ],
-          )
-        ],
+          ),
+        ),
       ),
-      margin: EdgeInsets.all(10.0),
-      padding: EdgeInsets.all(25.0),
-      decoration: BoxDecoration(
-        color: Colors.lightBlue,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    );
+    ));
   }
 
   Widget theGoal() {
@@ -305,34 +368,6 @@ class _ProfileState extends State<Profile> {
     super.dispose();
   }
 
-  Future<void> _showMyDialog() async {
-    return showDialog<void>(
-      context: context,
-      barrierDismissible: false, // user must tap button!
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('AlertDialog Title'),
-          content: SingleChildScrollView(
-            child: ListBody(
-              children: <Widget>[
-                Text('This is a demo alert dialog.'),
-                Text('Would you like to approve of this message?'),
-              ],
-            ),
-          ),
-          actions: <Widget>[
-            FlatButton(
-              child: Text('Approve'),
-              onPressed: () {
-                Get.back();
-              },
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     endTime = DateTime(2020, 9, 21).millisecondsSinceEpoch + 1000 * 60 * 60;
@@ -344,7 +379,7 @@ class _ProfileState extends State<Profile> {
     prevWeekAvg();
 
     trophies = user?.trophies ?? 0;
-
+    c.normal = LocalUser.normal ?? true;
     c.name = user?.name ?? "";
     c.fname = friend?.name ?? "";
 
@@ -354,10 +389,16 @@ class _ProfileState extends State<Profile> {
       floatingActionButton: !_goal && user != null && user.isAddict
           ? FloatingActionButton.extended(
         onPressed: () {
+          mode = Mode.normal;
           showModalBottomSheet(
+              isScrollControlled: true,
               context: context,
-              builder: (BuildContext bc) {
-                return theGoalSet(bc);
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: StatefulBuilder(builder: (BuildContext context, StateSetter state) {
+                    return theGoalSet(context, state);
+                  }),
+                );
               });
         },
         label: Text("Set Goal"),
@@ -381,46 +422,48 @@ class _ProfileState extends State<Profile> {
                         ? Container()
                         : Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                  children: [
-                                    SizedBox(height: 20),
-                                    CircleAvatar(
-                                        backgroundColor: Colors.transparent,
-                                        radius: 50,
-                                        child: ClipOval(
-                                          child: Image.network(
-                                            '${authUser.photoURL}',
-                                          ),
-                                        )),
-                                    SizedBox(height: 20),
-                                    Text("${c.name}"),
-                                  ],
-                                ),
-
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
-                                child: CountdownTimer(endTime: endTime,
-                                  onEnd: (){
-                                    print("Game Over");
-                                  },
-                                ),
-                              ),
-                            )
-                          ],
+                      children: [
+                        Expanded(
+                          child: Column(
+                            children: [
+                              SizedBox(height: 20),
+                              CircleAvatar(
+                                  backgroundColor: Colors.transparent,
+                                  radius: 50,
+                                  child: ClipOval(
+                                    child: Image.network(
+                                      '${authUser.photoURL}',
+                                    ),
+                                  )),
+                              SizedBox(height: 20),
+                              Text("${c.name}"),
+                            ],
+                          ),
                         ),
+                        Expanded(
+                          child: Container(
+                            margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
+                            child: CountdownTimer(
+                              endTime: endTime,
+                              onEnd: () {
+                                print("Game Over");
+                              },
+                            ),
+                          ),
+                        )
+                      ],
+                    ),
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight, // 10% of the width, so there are ten blinds.
-                      colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                      // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-                    )),
+                          begin: Alignment.bottomLeft,
+                          end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                          colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                          // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                        )),
                   ),
-                  SizedBox(height: 50,),
+                  SizedBox(
+                    height: 50,
+                  ),
                   TSCalender(
                     calendarController: _calendarController,
                     ot: _ot,
@@ -442,15 +485,18 @@ class _ProfileState extends State<Profile> {
                       children: [
                         TSShow(
                           text: "Mode",
-                          value: c.normal? "Mode 1": "Mode 2",
+                          value: c.normal ? "Normal" : "Helper",
+                          fontSize: 20,
                         ),
                         TSShow(
                           text: "Limit",
-                          value: user != null ? user.dailyLimit.toString(): "0",
+                          value: user != null ? UtilFunctions().minsToTime(user.dailyLimit) : "0",
+                          fontSize: 20,
                         ),
                         TSShow(
                           text: "Trophies",
                           value: trophies.toString(),
+                          fontSize: 20,
                         )
                       ],
                     ),
@@ -460,38 +506,6 @@ class _ProfileState extends State<Profile> {
         ],
       ),
     );
-
-    //   Scaffold(
-    //   body: SingleChildScrollView(
-    //     child: Column(
-    //       children: [
-    //         Row(
-    //           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    //           children: [
-    //             TSCard(
-    //               text: c.name,
-    //               color: Colors.blueGrey,
-    //             ),
-    //             TSCard(
-    //               text: c.fname,
-    //               color: Colors.blueGrey,
-    //             ),
-    //           ],
-    //         ),
-    //         _goal ? theGoal() : theGoalSet(context),
-    //         TSCard(
-    //           text: "Trophies = $trophies",
-    //           color: Colors.orange,
-    //           padding: 30,
-    //         ),
-    //         user==null?Text(""):user.isAddict?TSCalender(
-    //           calendarController: _calendarController,
-    //           ot: _ot,
-    //         ):Text("")
-    //       ],
-    //     ),
-    //   ),
-    // );
   }
 }
 
