@@ -152,6 +152,7 @@ class _ConnectState extends State<Connect> {
     c.acceptedAmount = user?.transaction?.accAmount ?? 0;
     _reqTimeController.text = c.requestedAmount.toString();
     trans = user?.allTransactions ?? [];
+
     String _getRequestTime(int value) {
       if (value == null) return "";
       int hrs = value ~/ 60;
@@ -161,7 +162,7 @@ class _ConnectState extends State<Connect> {
     }
 
     return Scaffold(
-      floatingActionButton: user.isAddict
+      floatingActionButton: user?.isAddict != null
           ? FloatingActionButton.extended(
               onPressed: () {
                 _showDialog(user);
@@ -261,77 +262,77 @@ class _ConnectState extends State<Connect> {
               padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    begin: Alignment.bottomLeft,
-                    end: Alignment.topRight,
-                    colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                    // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-                  )),
+                begin: Alignment.bottomLeft,
+                end: Alignment.topRight,
+                colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+              )),
               child: !user.isNull && !user.isAddict && !user.requestCompleted
                   ? Column(
-                children: [
-                  Text("Your friend needs ${_getRequestTime(c.requestedAmount)} of extra time.",
-                      style: TextStyle(fontSize: 15)),
-                  SizedBox(height: 10),
-                  Text("How much would you like to give ?", style: TextStyle(fontSize: 15)),
-                  SizedBox(height: 15),
-                  Container(
-                      width: 300,
-                      child: TextField(
-                        controller: _reqTimeController,
-                        textAlign: TextAlign.center,
-                        readOnly: true,
-                        style: TextStyle(fontSize: 25),
-                        onTap: () {
-                          showPickerArray(context, false);
-                        },
-                        decoration: InputDecoration(
-                          icon: Icon(Icons.access_time),
-                        ),
-                      )),
-                  SizedBox(height: 15),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.green,
-                        child: IconButton(
-                          icon: Icon(Icons.check),
-                          onPressed: () async {
-                            DataBaseService dbs = DataBaseService();
-                            CloudUser friend = await dbs.getFriendDetails();
-                            NotificationService nfs = NotificationService();
-                            TimeRequest t = await dbs.getRequestDetails();
-                            t.accAmount = int.parse(_reqTimeController.text);
-                            await dbs.updateRequest(int.parse(_reqTimeController.text));
-                            Vault.borrow(t);
-                            await dbs.completeRequest();
-                            await nfs.sendRequestAccept();
-                          },
-                        ),
-                      ),
-                      CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Colors.red,
-                        child: IconButton(
-                          icon: Icon(Icons.close),
-                          onPressed: () async {
-                            DataBaseService dbs = DataBaseService();
-                            CloudUser friend = await dbs.getFriendDetails();
-                            NotificationService nfs = NotificationService();
-                            TimeRequest t = await dbs.getRequestDetails();
-                            t.accAmount = 0;
-                            await dbs.updateRequest(int.parse(_reqTimeController.text));
-                            Vault.borrow(t);
-                            await dbs.completeRequest();
-                            await nfs.sendRequestRejected();
-                          },
-                        ),
-                      )
-                    ],
-                  )
-                ],
-              )
+                      children: [
+                        Text("Your friend needs ${_getRequestTime(c.requestedAmount)} of extra time.",
+                            style: TextStyle(fontSize: 15)),
+                        SizedBox(height: 10),
+                        Text("How much would you like to give ?", style: TextStyle(fontSize: 15)),
+                        SizedBox(height: 15),
+                        Container(
+                            width: 300,
+                            child: TextField(
+                              controller: _reqTimeController,
+                              textAlign: TextAlign.center,
+                              readOnly: true,
+                              style: TextStyle(fontSize: 25),
+                              onTap: () {
+                                showPickerArray(context, false);
+                              },
+                              decoration: InputDecoration(
+                                icon: Icon(Icons.access_time),
+                              ),
+                            )),
+                        SizedBox(height: 15),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.green,
+                              child: IconButton(
+                                icon: Icon(Icons.check),
+                                onPressed: () async {
+                                  DataBaseService dbs = DataBaseService();
+                                  CloudUser friend = await dbs.getFriendDetails();
+                                  NotificationService nfs = NotificationService();
+                                  TimeRequest t = await dbs.getRequestDetails();
+                                  t.accAmount = int.parse(_reqTimeController.text);
+                                  await dbs.updateRequest(int.parse(_reqTimeController.text));
+                                  Vault.borrow(t);
+                                  await dbs.completeRequest();
+                                  await nfs.sendRequestAccept();
+                                },
+                              ),
+                            ),
+                            CircleAvatar(
+                              radius: 20,
+                              backgroundColor: Colors.red,
+                              child: IconButton(
+                                icon: Icon(Icons.close),
+                                onPressed: () async {
+                                  DataBaseService dbs = DataBaseService();
+                                  CloudUser friend = await dbs.getFriendDetails();
+                                  NotificationService nfs = NotificationService();
+                                  TimeRequest t = await dbs.getRequestDetails();
+                                  t.accAmount = 0;
+                                  await dbs.updateRequest(int.parse(_reqTimeController.text));
+                                  Vault.borrow(t);
+                                  await dbs.completeRequest();
+                                  await nfs.sendRequestRejected();
+                                },
+                              ),
+                            )
+                          ],
+                        )
+                      ],
+                    )
                   : null,
             ),
           ],
