@@ -1,6 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_app/globalvars.dart';
 import 'package:flutter_app/models/AuthUser.dart';
+import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/LocalUser.dart';
 import 'package:flutter_app/services/databaseservice.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -49,6 +51,49 @@ class AuthService {
     }
   }
 
+  Future<int> googleLoginAgain([bool isFriend, String helpName]) async {
+    try {
+      AuthUser curUser;
+      GoogleSignInAccount googleUser = await _googleSignIn.signIn();
+      GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      AuthCredential authCredential =
+          GoogleAuthProvider.credential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+      UserCredential authUser = await _auth.signInWithCredential(authCredential);
+      if (authUser.additionalUserInfo.isNewUser) {
+        return 2;
+      } else {
+        DataBaseService _dbs = DataBaseService();
+        _dbs.initUid(authUser.user.uid);
+        curUser = _mapFirebaseUser(authUser.user);
+        CloudUser user = await _dbs.getUserDetails();
+        if (isFriend) {
+          if (user == null) {
+            return 1;
+          } else {
+            LocalUser.setUid(authUser.user.uid);
+            LocalUser.setSeen(true);
+            await OneSignal.shared.setExternalUserId(authUser.user.uid);
+            return 0;
+          }
+        } else {
+          if (user == null) {
+            return 1;
+          } else {
+            QuerySnapshot friend = await _dbs.socialCollection.where({"name": helpName}).get();
+            CloudUser fuser = _dbs.mapFireBasetoCloud(await _dbs.socialCollection.doc(friend.docs[0].get("uid")).get());
+            await _dbs.socialCollection.doc(authUser.user.uid).update({"fname": helpName, "fuid": fuser.uid});
+            LocalUser.setUid(authUser.user.uid);
+            LocalUser.setSeen(true);
+            await OneSignal.shared.setExternalUserId(authUser.user.uid);
+            return 0;
+          }
+        }
+      }
+    } catch (e) {
+      return -1;
+    }
+  }
+
   Future googleSignIn([String username, bool isFriend, String helpName]) async {
     try {
       AuthUser curUser;
@@ -70,9 +115,6 @@ class AuthService {
         curUser = _mapFirebaseUser(authUser.user);
         return curUser;
       } else {
-        DataBaseService _dbs = DataBaseService();
-        _dbs.initUid(authUser.user.uid);
-
         await OneSignal.shared.setExternalUserId(authUser.user.uid);
       }
     } catch (e) {
