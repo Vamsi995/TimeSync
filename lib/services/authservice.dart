@@ -50,7 +50,6 @@ class AuthService {
   }
 
   Future googleSignIn([String username, bool isFriend, String helpName]) async {
-    UtilFunctions.printf(FirebaseAuth.instance.app.options.asMap.toString());
     try {
       AuthUser curUser;
       GoogleSignInAccount googleUser = await _googleSignIn.signIn();
