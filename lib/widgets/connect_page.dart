@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
+import 'package:flutter_app/main.dart';
 import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
@@ -13,6 +14,7 @@ import 'package:provider/provider.dart';
 
 import '../globalvars.dart';
 import '../models/CloudUser.dart';
+import 'custom.dart';
 
 class Connect extends StatefulWidget {
   @override
@@ -336,6 +338,7 @@ class _ConnectState extends State<Connect> {
                   : null,
             ),
           ],
+
         ),
       ),
     );

@@ -69,6 +69,33 @@ class TSCard extends StatelessWidget {
   }
 }
 
+class TSShow extends StatelessWidget {
+
+  final String text;
+  final String value;
+
+  TSShow({@required this.text, @required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          this.text,
+          style: TextStyle(color: Color(0xFFB4C1CA)),
+        ),
+        Text(
+          this.value,
+          style: TextStyle(
+              color: Color(0xFF70D4FF), fontSize: 25),
+        ),
+      ],
+    );
+  }
+}
+
+
 class BeautyTextfield extends StatefulWidget {
   final BorderRadius cornerRadius;
   final double width, height, wordSpacing;

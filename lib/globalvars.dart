@@ -47,6 +47,7 @@ class Controller extends GetxController {
   String name = "";
   String fname = "";
   bool showLinechart = false;
+  bool normal = true;
 }
 
 class UtilFunctions {
