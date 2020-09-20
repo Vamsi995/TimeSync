@@ -43,6 +43,7 @@ class CloudUser {
   int trophies;
   List<TimeRequest> allTransactions;
   int dailyLimit;
+  String photoURL;
 
   final DataBaseService _dbs = DataBaseService();
 
@@ -58,7 +59,8 @@ class CloudUser {
       this.deadline,
       this.allTransactions,
       this.trophies,
-      this.dailyLimit});
+      this.dailyLimit,
+      this.photoURL});
 
   Map<String, dynamic> initCloudUser() {
     return {
