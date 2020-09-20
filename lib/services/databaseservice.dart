@@ -46,6 +46,7 @@ class DataBaseService {
         deadline: deadline,
         allTransactions: allTransactions,
         dailyLimit: user.get("dailyLimit"),
+        trophies: user.get("trophies"),
         photoURL: user.get("photoURL"));
   }
 

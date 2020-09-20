@@ -46,4 +46,12 @@ class LocalUser {
     await LocalStorage.localStorage.setDouble("timeDecay", value);
   }
 
+  static bool get normal {
+    return LocalStorage.localStorage.getBool("normal");
+  }
+
+  static Future<void> setNormal(bool value) async {
+    await LocalStorage.localStorage.setBool("normal", value);
+  }
+
 }

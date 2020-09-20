@@ -5,6 +5,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_app/globalvars.dart';
 import 'package:flutter_app/models/AuthUser.dart';
 import 'package:flutter_app/models/CloudUser.dart';
+import 'package:flutter_app/models/LocalUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
 import 'package:flutter_picker/Picker.dart';
@@ -28,13 +29,12 @@ class _ProfileState extends State<Profile> {
   CalendarController _calendarController = CalendarController();
   UtilFunctions utilFunctions = UtilFunctions();
 
-  bool flag = true;
 
   CloudUser user;
   CloudUser friend;
 
   bool _goal = false;
-  int _time;
+  int _time=0;
   int _dur;
   Duration _diff;
   DateTime _dDay;
@@ -48,8 +48,6 @@ class _ProfileState extends State<Profile> {
   Controller c = Get.put(Controller());
 
   final Map<DateTime, List> _ot = {
-    DateTime(2020, 9, 14): ['4.5'],
-    DateTime(2020, 9, 12): ['5.0'],
   };
 
   Future<void> updateCalendar() async {
@@ -197,7 +195,6 @@ class _ProfileState extends State<Profile> {
                         // _dDay = now.add(Duration(days: _dur * 7));
                         _dDay = now.add(Duration(minutes: _dur));
                         _diff = _dDay.difference(now);
-                        flag = false;
                       });
                       CloudUser.setDeadline(_dDay);
                       CloudUser.setDailyLimit(_time);
@@ -262,16 +259,14 @@ class _ProfileState extends State<Profile> {
     if (user.isAddict) {
       _dDay = user.deadline;
 
-      if (user.dailyLimit > 0) _time = user.dailyLimit;
+      if (_time <= 0) {
+        if (user.dailyLimit > 0) _time = user.dailyLimit;
+      }
 
       if (_dDay != null) {
         DateTime now = DateTime.now();
         _diff = _dDay.difference(now);
         _goal = _diff.inSeconds < 0 ? false : true;
-        if (!flag && !_goal) {
-          Vault.goalEnd();
-          flag = true;
-        }
       } else {
         _goal = false;
       }
@@ -294,6 +289,7 @@ class _ProfileState extends State<Profile> {
   void initState() {
     super.initState();
     updateCalendar();
+    c.normal = LocalUser.normal ?? true;
   }
 
   @override
@@ -332,7 +328,6 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
-    endTime = DateTime(2020, 9, 21).millisecondsSinceEpoch + 1000 * 60 * 60;
     AuthUser authUser = Provider.of<AuthUser>(context);
     user = DataBaseService().mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
     friend = Provider.of<CloudUser>(context);
@@ -340,12 +335,13 @@ class _ProfileState extends State<Profile> {
     getDuration();
     prevWeekAvg();
 
-    trophies = user?.trophies ?? 0;
+    endTime = user != null ? user.isAddict ? user.deadline.subtract(Duration(hours: 1)).millisecondsSinceEpoch + 1000 * 60 * 60:
+    friend.deadline.subtract(Duration(hours: 1)).millisecondsSinceEpoch + 1000 * 60 * 60: 0;
 
     c.name = user?.name ?? "";
     c.fname = friend?.name ?? "";
 
-    // UtilFunctions.printf(authUser.photoURL);
+    // UtilFunctions.printf(user.trophies);
 
     return Scaffold(
       floatingActionButton: !_goal && user != null && user.isAddict
@@ -403,7 +399,10 @@ class _ProfileState extends State<Profile> {
                                   margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
                                   child: CountdownTimer(endTime: endTime,
                                     onEnd: (){
-                                      print("Game Over");
+                                      Vault.goalEnd();
+                                      _time = 0;
+                                      CloudUser.setDailyLimit(0);
+                                      print("Time Over");
                                     },
                                   ),
                                 ),
@@ -448,14 +447,14 @@ class _ProfileState extends State<Profile> {
                           ),
                           TSShow(
                             text: "Trophies",
-                            value: trophies.toString(),
+                            value: user != null ? user.trophies.toString():"0",
                           )
                         ],
                       ),
                     )),
               ],
             ),
-            !_goal && user != null && user.isAddict ? theGoalSet(context): null,
+            !_goal && user != null && user.isAddict ? theGoalSet(context): Container(),
           ],
         ),
       ),

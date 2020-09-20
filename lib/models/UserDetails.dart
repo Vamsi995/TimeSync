@@ -38,7 +38,7 @@ class Vault {
     int temp = (user.vault * VaultDeprecation).round();
     UtilFunctions.printf(temp);
     CloudUser.setVault(user.vault - temp);
-    CloudUser.setTrophies(temp);
+    CloudUser.setTrophies(user.trophies + temp);
   }
 
   static void borrow(TimeRequest t) async {
