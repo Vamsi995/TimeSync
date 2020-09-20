@@ -80,10 +80,10 @@ class PieChart2State extends State<PieChartSample2> {
               mainAxisSize: MainAxisSize.max,
               mainAxisAlignment: MainAxisAlignment.end,
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const <Widget>[
+              children: <Widget>[
                 Indicator(
                   color: Color(0xFF415893),
-                  text: 'First',
+                  text: getTitle(0),
                   isSquare: true,
                 ),
                 SizedBox(
@@ -91,7 +91,7 @@ class PieChart2State extends State<PieChartSample2> {
                 ),
                 Indicator(
                   color: Color(0xFF2196F3),
-                  text: 'Second',
+                  text: getTitle(1),
                   isSquare: true,
                 ),
                 SizedBox(
@@ -99,7 +99,7 @@ class PieChart2State extends State<PieChartSample2> {
                 ),
                 Indicator(
                   color: Color(0xff02d39a),
-                  text: 'Third',
+                  text: getTitle(2),
                   isSquare: true,
                 ),
                 SizedBox(
@@ -107,7 +107,7 @@ class PieChart2State extends State<PieChartSample2> {
                 ),
                 Indicator(
                   color: Color(0xFF0D47A1),
-                  text: 'Fourth',
+                  text: getTitle(3),
                   isSquare: true,
                 ),
                 SizedBox(
@@ -136,8 +136,7 @@ class PieChart2State extends State<PieChartSample2> {
             value: getData(0),
             title: getData(0).toStringAsFixed(2) + "h",
             radius: radius,
-            titleStyle: TextStyle(
-                fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
+            titleStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
           );
         case 1:
           return PieChartSectionData(
@@ -145,8 +144,7 @@ class PieChart2State extends State<PieChartSample2> {
             value: getData(1),
             title: getData(1).toStringAsFixed(2) + "h",
             radius: radius,
-            titleStyle: TextStyle(
-                fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
+            titleStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
           );
         case 2:
           return PieChartSectionData(
@@ -154,8 +152,7 @@ class PieChart2State extends State<PieChartSample2> {
             value: getData(2),
             title: getData(2).toStringAsFixed(2) + "h",
             radius: radius,
-            titleStyle: TextStyle(
-                fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
+            titleStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
           );
         case 3:
           return PieChartSectionData(
@@ -163,8 +160,7 @@ class PieChart2State extends State<PieChartSample2> {
             value: getData(3),
             title: getData(3).toStringAsFixed(2) + "h",
             radius: radius,
-            titleStyle: TextStyle(
-                fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
+            titleStyle: TextStyle(fontSize: fontSize, fontWeight: FontWeight.bold, color: const Color(0xffffffff)),
           );
         default:
           return null;

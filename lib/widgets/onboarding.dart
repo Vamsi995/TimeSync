@@ -25,11 +25,11 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    const bodyStyle = TextStyle(fontSize: 19.0);
+    const bodyStyle = TextStyle(fontSize: 19.0, fontFamily: "Exo2");
     const pageDecoration = const PageDecoration(
       titleTextStyle: TextStyle(fontSize: 28.0, fontFamily: "Exo2", fontWeight: FontWeight.w700),
       bodyTextStyle: bodyStyle,
-      descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 16.0),
+      descriptionPadding: EdgeInsets.fromLTRB(16.0, 0.0, 10.0, 16.0),
       pageColor: Colors.white,
       imagePadding: EdgeInsets.zero,
     );
@@ -39,38 +39,34 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
       pages: [
         PageViewModel(
           title: "Time Sync",
-          body: "Something",
+          body: "",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Learn as you go",
-          body: "Download the Stockpile app and master the market with our mini-lesson.",
+          title: "What is TimeSync?",
+          body:
+              "TimeSync is a well-being app that helps you regulate your screen time. We take the saying \"Time is precious \" to the next level. This app uses app- blocking and the concept of accountability partner and habit contract to help you achieve your goal.",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Kids and teens",
-          body: "Kids and teens can track their stocks 24/7 and place trades that you approve.",
+          title: "Help Seeker",
+          body:
+          "If you need help with regulating your screen time then you are the help seeker when you exceed your daily time limit your apps get blocked or you can use the time you can save on previous days or ask your helper.",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Another title page",
-          body: "Another beautiful body text for this example onboarding",
+          title: "Helper",
+          body:
+          "Helper is the partner whom you choose at registration. The Helper has the freedom to accept, deny, or change the requested amount of time-based on your need and thus allowing you to use your apps again. The help seeker hasto repay the amount requested by cutting down screentime on some other day. ",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
         PageViewModel(
-          title: "Title of last page",
-          bodyWidget: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: const [
-              Text("Click on ", style: bodyStyle),
-              Icon(Icons.edit),
-              Text(" to edit a post", style: bodyStyle),
-            ],
-          ),
+          title: "He who has a why to live can bear almost any how",
+          body: "           - Nietzsche",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),

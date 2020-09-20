@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:app_usage/app_usage.dart';
 import 'package:background_fetch/background_fetch.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/globalvars.dart';
 import 'package:flutter_app/models/CloudUser.dart';
@@ -12,8 +13,6 @@ import 'package:flutter_app/services/notifications.dart';
 import 'package:flutter_app/widgets/Charts/pie_chart.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-
 
 import 'Charts/line_chart.dart';
 import 'custom.dart';
@@ -186,24 +185,21 @@ class _HomeState extends State<Home> {
       getLineChartData();
 
       DateTime today = DateTime.now();
-      DateTime startToday = DateTime(today.year,today.month,today.day);
+      DateTime startToday = DateTime(today.year, today.month, today.day);
 
       Duration diff = today.difference(startToday);
 
-
       int totalTime = await getDailyUsage();
 
-      if(DateTime.now().difference(startToday) < Duration(minutes: 15)) {
+      if (DateTime.now().difference(startToday) < Duration(minutes: 15)) {
         Vault.dailySaving();
         CloudUser user = await DataBaseService().getUserDetails();
-        if(!LocalUser.normal && user.isAddict) {
+        if (!LocalUser.normal && user.isAddict) {
           Vault.timeDecay();
         }
       }
 
-
-      if(user != null && user.isAddict && user.dailyLimit < totalTime)
-        NotificationService().sendTimeExceeded();
+      if (user != null && user.isAddict && user.dailyLimit < totalTime) NotificationService().sendTimeExceeded();
 
       if (mounted) {
         setState(() {
@@ -297,14 +293,12 @@ class _HomeState extends State<Home> {
                   child: Text(
                     'Your Progress',
                     style: TextStyle(
-                        color: Colors.white.withOpacity(1.0),
-                        fontSize: 25,
-
+                      color: Colors.white.withOpacity(1.0),
+                      fontSize: 25,
                     ),
                   )),
             ],
           ),
-          TSCard(text: 'Feedback/Charts', color: Colors.teal),
         ],
       ),
     );
