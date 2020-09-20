@@ -218,8 +218,8 @@ class _ProfileState extends State<Profile> {
                               setState(() {
                                 _goal = true;
                                 DateTime now = DateTime.now();
-                                // _dDay = now.add(Duration(days: _dur * 7));
-                                _dDay = now.add(Duration(minutes: _dur));
+                                _dDay = now.add(Duration(days: _dur * 7));
+                                // _dDay = now.add(Duration(minutes: _dur));
                                 _diff = _dDay.difference(now);
                               });
                               CloudUser.setDeadline(_dDay);
@@ -440,7 +440,9 @@ class _ProfileState extends State<Profile> {
                               Expanded(
                                 child: Container(
                                   margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
-                                  child: CountdownTimer(endTime: endTime,
+                                  child: CountdownTimer(
+                                    endTime: endTime,
+                                    daysSymbol: ":",
                                     onEnd: (){
                                       Vault.goalEnd();
                                       _time = 0;
@@ -487,7 +489,7 @@ class _ProfileState extends State<Profile> {
                           ),
                           TSShow(
                             text: "Limit",
-                            value: user != null ? UtilFunctions().minsToTime(user.dailyLimit) : "0",
+                            value: user != null ? UtilFunctions().minsToTime(_time) : "0",
                             fontSize: 20,
                           ),
                           TSShow(
