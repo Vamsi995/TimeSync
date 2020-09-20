@@ -53,5 +53,4 @@ class LocalUser {
   static Future<void> setNormal(bool value) async {
     await LocalStorage.localStorage.setBool("normal", value);
   }
-
 }
