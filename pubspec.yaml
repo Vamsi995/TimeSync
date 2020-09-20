@@ -38,6 +38,7 @@ dependencies:
   flutter_dotenv: ^2.1.0
   introduction_screen: ^1.0.9
   bottom_navy_bar: ^5.5.0
+  flutter_countdown_timer: ^1.1.0
 
 dev_dependencies:
   flutter_test:

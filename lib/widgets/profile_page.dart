@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_app/globalvars.dart';
+import 'package:flutter_app/models/AuthUser.dart';
 import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/UserDetails.dart';
 import 'package:flutter_app/services/databaseservice.dart';
@@ -10,11 +11,13 @@ import 'package:flutter_picker/Picker.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:flutter_countdown_timer/countdown_timer.dart';
 
 import 'custom.dart';
 import 'home_page.dart';
 
 const int FRIEND_VAULT_FACTOR = 10;
+
 
 class Profile extends StatefulWidget {
   @override
@@ -37,10 +40,12 @@ class _ProfileState extends State<Profile> {
   DateTime _dDay;
   double prevAvg = 0.0;
   bool valid = true;
-  bool normal = true;
   bool isMode1Selected = false;
 
   int trophies;
+  int endTime;
+
+  Controller c = Get.put(Controller());
 
   final Map<DateTime, List> _ot = {
     DateTime(2020, 9, 14): ['4.5'],
@@ -106,26 +111,29 @@ class _ProfileState extends State<Profile> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              ButtonCard(
-                text: "Model 1",
-                color: normal ? Colors.green : Colors.deepOrangeAccent,
-                onPress: () {
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              RadioListTile(
+                title: Text('Mode 1'),
+                value: c.normal,
+                groupValue: c.normal,
+                onChanged: (value) {
                   setState(() {
-                    normal = !normal;
+                    c.normal = value;
                   });
                 },
               ),
-              ButtonCard(
-                text: "Model 2",
-                color: !normal ? Colors.green : Colors.deepOrangeAccent,
-                onPress: () {
+              RadioListTile(
+                title: Text('Mode 2'),
+                value: !c.normal,
+                groupValue: c.normal,
+                onChanged: (value) {
                   setState(() {
-                    normal = !normal;
+                    c.normal = value;
                   });
                 },
-              )
+              ),
             ],
           ),
           TextField(
@@ -172,6 +180,7 @@ class _ProfileState extends State<Profile> {
                   onPressed: () {
                     setState(() {
                       _goal = true;
+                      Get.back();
                     });
                   },
                 ),
@@ -195,12 +204,11 @@ class _ProfileState extends State<Profile> {
                       });
                       CloudUser.setDeadline(_dDay);
                       CloudUser.setDailyLimit(_time);
-
-                      // Todo - Set friends vault
                       DataBaseService().updateFriendVault(_dur * 7 * FRIEND_VAULT_FACTOR);
-                      if (!normal) {
+                      if (!c.normal) {
                         Vault.decayCompute(prevAvg, _dur);
                       }
+                      Get.back();
                     },
                   ),
                 ),
@@ -327,6 +335,8 @@ class _ProfileState extends State<Profile> {
 
   @override
   Widget build(BuildContext context) {
+    endTime = DateTime(2020, 9, 21).millisecondsSinceEpoch + 1000 * 60 * 60;
+    AuthUser authUser = Provider.of<AuthUser>(context);
     user = DataBaseService().mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
     friend = Provider.of<CloudUser>(context);
     Controller c = Get.put(Controller());
@@ -338,7 +348,21 @@ class _ProfileState extends State<Profile> {
     c.name = user?.name ?? "";
     c.fname = friend?.name ?? "";
 
+    // UtilFunctions.printf(authUser.photoURL);
+
     return Scaffold(
+      floatingActionButton: !_goal && user != null && user.isAddict
+          ? FloatingActionButton.extended(
+        onPressed: () {
+          showModalBottomSheet(
+              context: context,
+              builder: (BuildContext bc) {
+                return theGoalSet(bc);
+              });
+        },
+        label: Text("Set Goal"),
+      )
+          : null,
       backgroundColor: Color(0xFFD7F5FD),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -348,39 +372,66 @@ class _ProfileState extends State<Profile> {
             alignment: AlignmentDirectional.bottomCenter,
             overflow: Overflow.visible,
             children: [
-              Container(
-                height: 250,
-                width: 500,
-                child: user == null
-                    ? Container()
-                    : Column(
-                        children: [
-                          SizedBox(height: 20),
-                          CircleAvatar(
-                              backgroundColor: Colors.transparent,
-                              radius: 50,
-                              child: ClipOval(
-                                child: Image.network(
-                                  '${user.photoURL}',
+              Column(
+                children: [
+                  Container(
+                    height: 250,
+                    width: 500,
+                    child: authUser == null
+                        ? Container()
+                        : Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                  children: [
+                                    SizedBox(height: 20),
+                                    CircleAvatar(
+                                        backgroundColor: Colors.transparent,
+                                        radius: 50,
+                                        child: ClipOval(
+                                          child: Image.network(
+                                            '${authUser.photoURL}',
+                                          ),
+                                        )),
+                                    SizedBox(height: 20),
+                                    Text("${c.name}"),
+                                  ],
                                 ),
-                              )),
-                          SizedBox(height: 20),
-                          Text("${c.name}"),
-                        ],
-                      ),
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                  begin: Alignment.bottomLeft,
-                  end: Alignment.topRight, // 10% of the width, so there are ten blinds.
-                  colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                  // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-                )),
+
+                            ),
+                            Expanded(
+                              child: Container(
+                                margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
+                                child: CountdownTimer(endTime: endTime,
+                                  onEnd: (){
+                                    print("Game Over");
+                                  },
+                                ),
+                              ),
+                            )
+                          ],
+                        ),
+                    decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                      colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                      // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                    )),
+                  ),
+                  SizedBox(height: 50,),
+                  TSCalender(
+                    calendarController: _calendarController,
+                    ot: _ot,
+                  ),
+                ],
               ),
               Positioned(
-                  bottom: -50,
+                  top: 180,
                   child: Container(
-                    height: 110,
-                    width: 370,
+                    height: 100,
+                    width: 390,
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(7),
@@ -389,48 +440,21 @@ class _ProfileState extends State<Profile> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                       children: [
-                        Container(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Mode - 1",
-                              style: TextStyle(
-                                  color: isMode1Selected ? Colors.blue : Colors.blue[300],
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900),
-                            ),
-                          ],
-                        )),
-                        Container(
-                            child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              "Mode - 2",
-                              style: TextStyle(
-                                  color: !isMode1Selected ? Colors.blue : Colors.blue[300],
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.w900),
-                            ),
-                          ],
-                        )),
-                        FlatButton(
-                          child: Icon(Icons.help_outline, color: Colors.grey),
-                          splashColor: Colors.transparent,
-                          onPressed: () {
-                            _showMyDialog();
-                          },
+                        TSShow(
+                          text: "Mode",
+                          value: c.normal? "Mode 1": "Mode 2",
+                        ),
+                        TSShow(
+                          text: "Limit",
+                          value: user != null ? user.dailyLimit.toString(): "0",
+                        ),
+                        TSShow(
+                          text: "Trophies",
+                          value: trophies.toString(),
                         )
                       ],
                     ),
                   )),
-              Positioned(
-                bottom: -100,
-                child: Container(
-                  child: Text("hi"),
-                ),
-              )
             ],
           ),
         ],
