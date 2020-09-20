@@ -164,7 +164,7 @@ class _ConnectState extends State<Connect> {
     }
 
     return Scaffold(
-      floatingActionButton: user?.isAddict != null
+      floatingActionButton: user != null && user.isAddict
           ? FloatingActionButton.extended(
               onPressed: () {
                 _showDialog(user);

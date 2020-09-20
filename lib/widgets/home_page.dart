@@ -1,9 +1,19 @@
+import 'dart:async';
+
 import 'package:app_usage/app_usage.dart';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/globalvars.dart';
+import 'package:flutter_app/models/CloudUser.dart';
+import 'package:flutter_app/models/LocalUser.dart';
+import 'package:flutter_app/models/UserDetails.dart';
+import 'package:flutter_app/services/databaseservice.dart';
+import 'package:flutter_app/services/notifications.dart';
 import 'package:flutter_app/widgets/Charts/pie_chart.dart';
 import 'package:get/get.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 import 'Charts/line_chart.dart';
 import 'custom.dart';
@@ -56,6 +66,8 @@ class _HomeState extends State<Home> {
   List<AppUsageInfo> weekData;
   List<double> lineChartData = new List();
   Controller c = Get.put(Controller());
+
+  CloudUser user;
 
   @override
   void initState() {
@@ -170,8 +182,28 @@ class _HomeState extends State<Home> {
       // This is the fetch-event callback.
       print("[BackgroundFetch] Event received $taskId");
 
-      // getUsageStats();
-      // getLineChartData();
+      getUsageStats();
+      getLineChartData();
+
+      DateTime today = DateTime.now();
+      DateTime startToday = DateTime(today.year,today.month,today.day);
+
+      Duration diff = today.difference(startToday);
+
+
+      int totalTime = await getDailyUsage();
+
+      if(DateTime.now().difference(startToday) < Duration(minutes: 15)) {
+        Vault.dailySaving();
+        CloudUser user = await DataBaseService().getUserDetails();
+        if(!LocalUser.normal && user.isAddict) {
+          Vault.timeDecay();
+        }
+      }
+
+
+      if(user != null && user.isAddict && user.dailyLimit < totalTime)
+        NotificationService().sendTimeExceeded();
 
       if (mounted) {
         setState(() {
@@ -240,6 +272,7 @@ class _HomeState extends State<Home> {
 
   @override
   Widget build(BuildContext context) {
+    user = DataBaseService().mapFireBasetoCloud(Provider.of<DocumentSnapshot>(context));
     return Scaffold(
       backgroundColor: Color(0xFFD7F5FD),
       body: ListView(

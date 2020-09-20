@@ -11,8 +11,8 @@ class TSText extends StatelessWidget {
     return Text(
       this.text,
       style: TextStyle(
-          fontSize: 25,
-          color: Colors.black,
+        fontSize: 25,
+        color: Colors.black,
       ),
     );
   }
@@ -70,11 +70,11 @@ class TSCard extends StatelessWidget {
 }
 
 class TSShow extends StatelessWidget {
-
   final String text;
   final String value;
+  final double fontSize;
 
-  TSShow({@required this.text, @required this.value});
+  TSShow({@required this.text, @required this.value, this.fontSize = 25});
 
   @override
   Widget build(BuildContext context) {
@@ -87,14 +87,12 @@ class TSShow extends StatelessWidget {
         ),
         Text(
           this.value,
-          style: TextStyle(
-              color: Color(0xFF70D4FF), fontSize: 25),
+          style: TextStyle(color: Color(0xFF70D4FF), fontSize: fontSize),
         ),
       ],
     );
   }
 }
-
 
 class BeautyTextfield extends StatefulWidget {
   final BorderRadius cornerRadius;
