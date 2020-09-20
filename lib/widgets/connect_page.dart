@@ -273,7 +273,7 @@ class _ConnectState extends State<Connect> {
                 ]),
             Container(
               margin: EdgeInsets.fromLTRB(0, 2, 0, 0),
-              padding: EdgeInsets.fromLTRB(0, 10, 0, 0),
+              padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomLeft,
