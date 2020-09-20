@@ -185,24 +185,21 @@ class _HomeState extends State<Home> {
       getLineChartData();
 
       DateTime today = DateTime.now();
-      DateTime startToday = DateTime(today.year,today.month,today.day);
+      DateTime startToday = DateTime(today.year, today.month, today.day);
 
       Duration diff = today.difference(startToday);
 
-
       int totalTime = await getDailyUsage();
 
-      if(diff < Duration(minutes: 15)) {
+      if (diff < Duration(minutes: 15)) {
         Vault.dailySaving();
         CloudUser user = await DataBaseService().getUserDetails();
-        if(!LocalUser.normal && user.isAddict) {
+        if (!LocalUser.normal && user.isAddict) {
           Vault.timeDecay();
         }
       }
 
-
-      if(user != null && user.isAddict && user.dailyLimit < totalTime)
-        NotificationService().sendTimeExceeded();
+      if (user != null && user.isAddict && user.dailyLimit < totalTime) NotificationService().sendTimeExceeded();
 
       if (mounted) {
         setState(() {

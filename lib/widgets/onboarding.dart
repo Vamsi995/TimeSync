@@ -53,7 +53,7 @@ class _OnBoardingPageState extends State<OnBoardingPage> {
         PageViewModel(
           title: "Help Seeker",
           body:
-          "If you need help with regulating your screen time then you are the help seeker when you exceed your daily time limit your apps get blocked or you can use the time you can save on previous days or ask your helper.",
+              "If you need help with regulating your screen time then you are the help seeker when you exceed your daily time limit your apps get blocked or you can use the time you can save on previous days or ask your helper.",
           image: _buildImage('Logo.png'),
           decoration: pageDecoration,
         ),
