@@ -489,7 +489,7 @@ class _ProfileState extends State<Profile> {
                           ),
                           TSShow(
                             text: "Limit",
-                            value: user != null ? UtilFunctions().minsToTime(user.dailyLimit) : "0",
+                            value: user != null ? UtilFunctions().minsToTime(_time) : "0",
                             fontSize: 20,
                           ),
                           TSShow(
