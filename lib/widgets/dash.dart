@@ -7,7 +7,7 @@ import 'package:flutter_app/models/CloudUser.dart';
 import 'package:flutter_app/models/LocalUser.dart';
 import 'package:flutter_app/services/authservice.dart';
 import 'package:flutter_app/services/databaseservice.dart';
-import 'package:flutter_app/widgets/initial_page.dart';
+import 'package:flutter_app/widgets/onboarding.dart';
 import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
@@ -60,17 +60,17 @@ class _DashState extends State<Dash> {
           title: Text('Time Sync'),
           actions: <Widget>[
             IconButton(
-              icon: Icon(Icons.not_interested),
+              icon: Icon(Icons.exit_to_app),
               onPressed: () async {
                 await LocalStorage.localStorage.clear();
-                Get.off(AuthScreen());
+                Get.off(OnBoardingPage());
               },
             ),
             IconButton(
               icon: Icon(Icons.delete),
               onPressed: () async {
                 await AuthService().deleteUser();
-                Get.off(AuthScreen());
+                Get.off(OnBoardingPage());
               },
             ),
             IconButton(
