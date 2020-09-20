@@ -388,21 +388,21 @@ class _ProfileState extends State<Profile> {
     return Scaffold(
       floatingActionButton: !_goal && user != null && user.isAddict
           ? FloatingActionButton.extended(
-        onPressed: () {
-          mode = Mode.normal;
-          showModalBottomSheet(
-              isScrollControlled: true,
-              context: context,
-              builder: (BuildContext context) {
-                return Scaffold(
-                  body: StatefulBuilder(builder: (BuildContext context, StateSetter state) {
-                    return theGoalSet(context, state);
-                  }),
-                );
-              });
-        },
-        label: Text("Set Goal"),
-      )
+              onPressed: () {
+                mode = Mode.normal;
+                showModalBottomSheet(
+                    isScrollControlled: true,
+                    context: context,
+                    builder: (BuildContext context) {
+                      return Scaffold(
+                        body: StatefulBuilder(builder: (BuildContext context, StateSetter state) {
+                          return theGoalSet(context, state);
+                        }),
+                      );
+                    });
+              },
+              label: Text("Set Goal"),
+            )
           : null,
       backgroundColor: Color(0xFFD7F5FD),
       body: Column(
@@ -421,45 +421,45 @@ class _ProfileState extends State<Profile> {
                     child: authUser == null
                         ? Container()
                         : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        Expanded(
-                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                             children: [
-                              SizedBox(height: 20),
-                              CircleAvatar(
-                                  backgroundColor: Colors.transparent,
-                                  radius: 50,
-                                  child: ClipOval(
-                                    child: Image.network(
-                                      '${authUser.photoURL}',
-                                    ),
-                                  )),
-                              SizedBox(height: 20),
-                              Text("${c.name}"),
+                              Expanded(
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: 20),
+                                    CircleAvatar(
+                                        backgroundColor: Colors.transparent,
+                                        radius: 50,
+                                        child: ClipOval(
+                                          child: Image.network(
+                                            '${authUser.photoURL}',
+                                          ),
+                                        )),
+                                    SizedBox(height: 20),
+                                    Text("${c.name}"),
+                                  ],
+                                ),
+                              ),
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
+                                  child: CountdownTimer(
+                                    endTime: endTime,
+                                    onEnd: () {
+                                      print("Game Over");
+                                    },
+                                  ),
+                                ),
+                              )
                             ],
                           ),
-                        ),
-                        Expanded(
-                          child: Container(
-                            margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
-                            child: CountdownTimer(
-                              endTime: endTime,
-                              onEnd: () {
-                                print("Game Over");
-                              },
-                            ),
-                          ),
-                        )
-                      ],
-                    ),
                     decoration: BoxDecoration(
                         gradient: LinearGradient(
-                          begin: Alignment.bottomLeft,
-                          end: Alignment.topRight, // 10% of the width, so there are ten blinds.
-                          colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                          // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-                        )),
+                      begin: Alignment.bottomLeft,
+                      end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                      colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                      // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                    )),
                   ),
                   SizedBox(
                     height: 50,
