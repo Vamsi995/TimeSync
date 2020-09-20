@@ -197,11 +197,9 @@ class _HomeState extends State<Home> {
       Timer.periodic(Duration(days: 1), (Timer t) async {
         Vault.dailySaving();
         CloudUser user = await DataBaseService().getUserDetails();
-
         if(!LocalUser.normal && user.isAddict) {
           Vault.timeDecay();
         }
-
       });
 
       if(user != null && user.isAddict && user.dailyLimit < totalTime)
