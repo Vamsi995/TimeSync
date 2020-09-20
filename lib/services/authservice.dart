@@ -127,7 +127,7 @@ class AuthService {
     GoogleSignInAccount googleUser = await _googleSignIn.signIn();
     GoogleSignInAuthentication googleAuth = await googleUser.authentication;
     AuthCredential authCredential =
-    GoogleAuthProvider.credential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
+        GoogleAuthProvider.credential(idToken: googleAuth.idToken, accessToken: googleAuth.accessToken);
     User user = _auth.currentUser;
     UserCredential curUser = await user.reauthenticateWithCredential(authCredential);
     await OneSignal.shared.removeExternalUserId();
