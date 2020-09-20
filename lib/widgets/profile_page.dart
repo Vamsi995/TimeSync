@@ -18,7 +18,7 @@ import 'custom.dart';
 import 'home_page.dart';
 
 const int FRIEND_VAULT_FACTOR = 10;
-
+enum Mode { normal, decay }
 
 class Profile extends StatefulWidget {
   @override
@@ -44,6 +44,7 @@ class _ProfileState extends State<Profile> {
 
   int trophies;
   int endTime;
+  Mode mode = Mode.normal;
 
   Controller c = Get.put(Controller());
 
@@ -104,121 +105,145 @@ class _ProfileState extends State<Profile> {
         }).showDialog(context);
   }
 
-  Widget theGoalSet(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-        DropdownButton<String>(
-        value: c.normal ? "Mode 1": "Mode 2",
-        icon: Icon(Icons.arrow_downward),
-        iconSize: 24,
-        elevation: 16,
-        style: TextStyle(color: Colors.deepPurple),
-        underline: Container(
-          height: 2,
-          color: Colors.deepPurpleAccent,
-        ),
-        onChanged: (String newValue) {
-          setState(() {
-            c.normal = newValue == 'Mode 1';
-          });
-        },
-        items: <String>['Mode 1', 'Mode 2']
-            .map<DropdownMenuItem<String>>((String value) {
-          return DropdownMenuItem<String>(
-            value: value,
-            child: Text(value),
-          );
-        }).toList(),
-        ),
-          TextField(
-            style: TextStyle(fontSize: 25),
-            controller: _timeController,
-            readOnly: true,
-            // maxLength: 10,
-            // keyboardType: TextInputType.number,
-            decoration: InputDecoration(
-              icon: Icon(Icons.access_time),
-              helperText:
-                  "Enter Daily Quota, max = ${prevAvg.floor()} hrs ${(60 * (prevAvg - prevAvg.floor())).ceil()} mins",
-            ),
-            onTap: () {
-              showPickerArray(context);
-            },
-            onChanged: (text) {
-              _time = double.parse(text).round();
-              setState(() {
-                valid = _time <= prevAvg * 60;
-              });
-            },
-          ),
-          TextField(
-            maxLength: 5,
-            style: TextStyle(fontSize: 25),
-            keyboardType: TextInputType.number,
-            decoration: InputDecoration(icon: Icon(Icons.view_week), helperText: "Enter the weeks to follow"),
-            onChanged: (text) {
-              _dur = int.parse(text);
-            },
-          ),
-          SizedBox(
-            height: 10,
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CircleAvatar(
-                radius: 30,
-                backgroundColor: Colors.red,
-                child: IconButton(
-                  icon: Icon(Icons.close),
-                  onPressed: () {
-                    setState(() {
-                      _goal = true;
-                      Get.back();
-                    });
-                  },
-                ),
-              ),
-              Visibility(
-                visible: valid,
-                child: CircleAvatar(
-                  radius: 30,
-                  backgroundColor: Colors.green,
-                  child: IconButton(
-                    icon: Icon(Icons.check),
-                    color: Colors.black,
-                    onPressed: () async {
-                      setState(() {
-                        _goal = true;
-                        DateTime now = DateTime.now();
-                        // _dDay = now.add(Duration(days: _dur * 7));
-                        _dDay = now.add(Duration(minutes: _dur));
-                        _diff = _dDay.difference(now);
+  Widget theGoalSet(BuildContext context, StateSetter state) {
+    return Scaffold(
+        body: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 43.0),
+          child: Container(
+            alignment: Alignment.center,
+            child: SingleChildScrollView(
+              // new line
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: <Widget>[
+                      new Radio(
+                        value: Mode.normal,
+                        activeColor: Colors.blue[900],
+                        groupValue: mode,
+                        onChanged: (value) {
+                          state(() {
+                            mode = value;
+                          });
+                        },
+                      ),
+                      new Text(
+                        'Normal',
+                      ),
+                      new SizedBox(width: 30),
+                      new Radio(
+                        value: Mode.decay,
+                        activeColor: Colors.blue[900],
+                        groupValue: mode,
+                        onChanged: (value) {
+                          state(() {
+                            mode = value;
+                          });
+                        },
+                      ),
+                      new Text('Helper'),
+                      new SizedBox(width: 10),
+                      new FlatButton(
+                          onPressed: () {
+                            _showMyDialog();
+                          },
+                          splashColor: Colors.transparent,
+                          child: Icon(
+                            Icons.help_outline,
+                            size: 20,
+                          ))
+                    ],
+                  ),
+                  TextField(
+                    style: TextStyle(fontSize: 25),
+                    controller: _timeController,
+                    readOnly: true,
+                    // maxLength: 10,
+                    // keyboardType: TextInputType.number,
+                    decoration: InputDecoration(
+                      icon: Icon(Icons.access_time),
+                      helperText:
+                      "Enter Daily Quota, max = ${prevAvg.floor()} hrs ${(60 * (prevAvg - prevAvg.floor())).ceil()} mins",
+                    ),
+                    onTap: () {
+                      showPickerArray(context);
+                    },
+                    onChanged: (text) {
+                      _time = double.parse(text).round();
+                      state(() {
+                        valid = _time <= prevAvg * 60;
                       });
-                      CloudUser.setDeadline(_dDay);
-                      CloudUser.setDailyLimit(_time);
-                      DataBaseService().updateFriendVault(_dur * 7 * FRIEND_VAULT_FACTOR);
-                      if (!c.normal) {
-                        Vault.decayCompute(prevAvg, _dur);
-                      }
-                      Get.back();
                     },
                   ),
-                ),
+                  TextField(
+                    maxLength: 5,
+                    style: TextStyle(fontSize: 25),
+                    keyboardType: TextInputType.number,
+                    decoration: InputDecoration(icon: Icon(Icons.view_week), helperText: "Enter the weeks to follow"),
+                    onChanged: (text) {
+                      _dur = int.parse(text);
+                    },
+                  ),
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      CircleAvatar(
+                        radius: 25,
+                        backgroundColor: Colors.red,
+                        child: IconButton(
+                          icon: Icon(Icons.close),
+                          onPressed: () {
+                            state(() {
+                              _goal = true;
+                              Get.back();
+                            });
+                          },
+                        ),
+                      ),
+                      Visibility(
+                        visible: valid,
+                        child: CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.green,
+                          child: IconButton(
+                            icon: Icon(Icons.check),
+                            color: Colors.black,
+                            onPressed: () async {
+                              setState(() {
+                                _goal = true;
+                                DateTime now = DateTime.now();
+                                // _dDay = now.add(Duration(days: _dur * 7));
+                                _dDay = now.add(Duration(minutes: _dur));
+                                _diff = _dDay.difference(now);
+                              });
+                              CloudUser.setDeadline(_dDay);
+                              CloudUser.setDailyLimit(_time);
+                              DataBaseService().updateFriendVault(_dur * 7 * FRIEND_VAULT_FACTOR);
+                              c.normal = mode == Mode.normal;
+                              LocalUser.setNormal(c.normal);
+                              if (!c.normal) {
+                                Vault.decayCompute(prevAvg, _dur);
+                              }
+                              Get.back();
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
               ),
-            ],
-          )
-        ],
-      ),
-      margin: EdgeInsets.all(10.0),
-      padding: EdgeInsets.all(25.0),
-      decoration: BoxDecoration(
-        color: Colors.lightBlue,
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    );
+            ),
+          ),
+        ));
   }
+
 
   Widget theGoal() {
     return Row(
@@ -304,18 +329,30 @@ class _ProfileState extends State<Profile> {
       barrierDismissible: false, // user must tap button!
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('AlertDialog Title'),
           content: SingleChildScrollView(
             child: ListBody(
               children: <Widget>[
-                Text('This is a demo alert dialog.'),
-                Text('Would you like to approve of this message?'),
+                SizedBox(height: 30),
+                Text(
+                  'What is Normal mode ?',
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                Text('Want to be ambitious? In choosing this mode the goal set by the user will be used as a strict '
+                    'daily limit for the set duration. time saved each day will be calculated on this limit.'),
+                SizedBox(height: 30),
+                Text(
+                  "What is Helper mode ?",
+                  style: TextStyle(fontWeight: FontWeight.w900),
+                ),
+                Text("Willpower is overrated !! if you want to set a goal that is difficult then this mode "
+                    "will help you to gradually ease into the set goal time starting from your previous average "
+                    "usage to desired goal usage in the set duration. You got this!   ")
               ],
             ),
           ),
           actions: <Widget>[
             FlatButton(
-              child: Text('Approve'),
+              child: Text('Close'),
               onPressed: () {
                 Get.back();
               },
@@ -347,10 +384,16 @@ class _ProfileState extends State<Profile> {
       floatingActionButton: !_goal && user != null && user.isAddict
           ? FloatingActionButton.extended(
         onPressed: () {
+          mode = Mode.normal;
           showModalBottomSheet(
+              isScrollControlled: true,
               context: context,
-              builder: (BuildContext bc) {
-                return theGoalSet(bc);
+              builder: (BuildContext context) {
+                return Scaffold(
+                  body: StatefulBuilder(builder: (BuildContext context, StateSetter state) {
+                    return theGoalSet(context, state);
+                  }),
+                );
               });
         },
         label: Text("Set Goal"),
@@ -439,22 +482,24 @@ class _ProfileState extends State<Profile> {
                         children: [
                           TSShow(
                             text: "Mode",
-                            value: c.normal? "Mode 1": "Mode 2",
+                            value: c.normal ? "Normal" : "Helper",
+                            fontSize: 20,
                           ),
                           TSShow(
                             text: "Limit",
-                            value: user != null ? user.dailyLimit.toString(): "0",
+                            value: user != null ? UtilFunctions().minsToTime(user.dailyLimit) : "0",
+                            fontSize: 20,
                           ),
                           TSShow(
                             text: "Trophies",
                             value: user != null ? user.trophies.toString():"0",
+                            fontSize: 20,
                           )
                         ],
                       ),
                     )),
               ],
             ),
-            !_goal && user != null && user.isAddict ? theGoalSet(context): Container(),
           ],
         ),
       ),
