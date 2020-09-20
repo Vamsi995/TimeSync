@@ -110,32 +110,29 @@ class _ProfileState extends State<Profile> {
     return Container(
       child: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: <Widget>[
-              RadioListTile(
-                title: Text('Mode 1'),
-                value: c.normal,
-                groupValue: c.normal,
-                onChanged: (value) {
-                  setState(() {
-                    c.normal = value;
-                  });
-                },
-              ),
-              RadioListTile(
-                title: Text('Mode 2'),
-                value: !c.normal,
-                groupValue: c.normal,
-                onChanged: (value) {
-                  setState(() {
-                    c.normal = value;
-                  });
-                },
-              ),
-            ],
-          ),
+        DropdownButton<String>(
+        value: c.normal ? "Mode 1": "Mode 2",
+        icon: Icon(Icons.arrow_downward),
+        iconSize: 24,
+        elevation: 16,
+        style: TextStyle(color: Colors.deepPurple),
+        underline: Container(
+          height: 2,
+          color: Colors.deepPurpleAccent,
+        ),
+        onChanged: (String newValue) {
+          setState(() {
+            c.normal = newValue == 'Mode 1';
+          });
+        },
+        items: <String>['Mode 1', 'Mode 2']
+            .map<DropdownMenuItem<String>>((String value) {
+          return DropdownMenuItem<String>(
+            value: value,
+            child: Text(value),
+          );
+        }).toList(),
+        ),
           TextField(
             style: TextStyle(fontSize: 25),
             controller: _timeController,
@@ -364,100 +361,103 @@ class _ProfileState extends State<Profile> {
       )
           : null,
       backgroundColor: Color(0xFFD7F5FD),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        // mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Stack(
-            alignment: AlignmentDirectional.bottomCenter,
-            overflow: Overflow.visible,
-            children: [
-              Column(
-                children: [
-                  Container(
-                    height: 250,
-                    width: 500,
-                    child: authUser == null
-                        ? Container()
-                        : Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                          children: [
-                            Expanded(
-                              child: Column(
-                                  children: [
-                                    SizedBox(height: 20),
-                                    CircleAvatar(
-                                        backgroundColor: Colors.transparent,
-                                        radius: 50,
-                                        child: ClipOval(
-                                          child: Image.network(
-                                            '${authUser.photoURL}',
-                                          ),
-                                        )),
-                                    SizedBox(height: 20),
-                                    Text("${c.name}"),
-                                  ],
-                                ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          // mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Stack(
+              alignment: AlignmentDirectional.bottomCenter,
+              overflow: Overflow.visible,
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      height: 250,
+                      width: 500,
+                      child: authUser == null
+                          ? Container()
+                          : Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                    children: [
+                                      SizedBox(height: 20),
+                                      CircleAvatar(
+                                          backgroundColor: Colors.transparent,
+                                          radius: 50,
+                                          child: ClipOval(
+                                            child: Image.network(
+                                              '${authUser.photoURL}',
+                                            ),
+                                          )),
+                                      SizedBox(height: 20),
+                                      Text("${c.name}"),
+                                    ],
+                                  ),
 
-                            ),
-                            Expanded(
-                              child: Container(
-                                margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
-                                child: CountdownTimer(endTime: endTime,
-                                  onEnd: (){
-                                    print("Game Over");
-                                  },
-                                ),
                               ),
-                            )
-                          ],
-                        ),
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                      begin: Alignment.bottomLeft,
-                      end: Alignment.topRight, // 10% of the width, so there are ten blinds.
-                      colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                      // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                              Expanded(
+                                child: Container(
+                                  margin: EdgeInsets.fromLTRB(0, 0, 0, 80),
+                                  child: CountdownTimer(endTime: endTime,
+                                    onEnd: (){
+                                      print("Game Over");
+                                    },
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                      decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                        begin: Alignment.bottomLeft,
+                        end: Alignment.topRight, // 10% of the width, so there are ten blinds.
+                        colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                        // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                      )),
+                    ),
+                    SizedBox(height: 50,),
+                    TSCalender(
+                      calendarController: _calendarController,
+                      ot: _ot,
+                    ),
+                  ],
+                ),
+                Positioned(
+                    top: 180,
+                    child: Container(
+                      height: 100,
+                      width: 390,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(7),
+                        boxShadow: [BoxShadow(color: Color(0xFF21BEFE), blurRadius: 7)],
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          TSShow(
+                            text: "Mode",
+                            value: c.normal? "Mode 1": "Mode 2",
+                          ),
+                          TSShow(
+                            text: "Limit",
+                            value: user != null ? user.dailyLimit.toString(): "0",
+                          ),
+                          TSShow(
+                            text: "Trophies",
+                            value: trophies.toString(),
+                          )
+                        ],
+                      ),
                     )),
-                  ),
-                  SizedBox(height: 50,),
-                  TSCalender(
-                    calendarController: _calendarController,
-                    ot: _ot,
-                  ),
-                ],
-              ),
-              Positioned(
-                  top: 180,
-                  child: Container(
-                    height: 100,
-                    width: 390,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(7),
-                      boxShadow: [BoxShadow(color: Color(0xFF21BEFE), blurRadius: 7)],
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        TSShow(
-                          text: "Mode",
-                          value: c.normal? "Mode 1": "Mode 2",
-                        ),
-                        TSShow(
-                          text: "Limit",
-                          value: user != null ? user.dailyLimit.toString(): "0",
-                        ),
-                        TSShow(
-                          text: "Trophies",
-                          value: trophies.toString(),
-                        )
-                      ],
-                    ),
-                  )),
-            ],
-          ),
-        ],
+              ],
+            ),
+            !_goal && user != null && user.isAddict ? theGoalSet(context): null,
+          ],
+        ),
       ),
     );
 
