@@ -63,7 +63,7 @@ class DataBaseService {
   Future addFirstUser(String name, String uid) async {
     AuthUser user = AuthService().getCurrentUser();
     uid = user.uid;
-    await addUserExtID();
+    addUserExtID();
     return await socialCollection.doc(uid).set({
       'uid': uid,
       'name': name,
@@ -85,7 +85,7 @@ class DataBaseService {
     QuerySnapshot users = await socialCollection.get();
     AuthUser user = AuthService().getCurrentUser();
     uid = user.uid;
-    await addUserExtID();
+    addUserExtID();
     QueryDocumentSnapshot friend = users.docs.singleWhere((element) => element.get("name") == fname);
     await socialCollection.doc(uid).set({
       'uid': uid,
