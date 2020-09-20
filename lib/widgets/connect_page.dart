@@ -161,10 +161,14 @@ class _ConnectState extends State<Connect> {
     }
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {},
-        label: Text("Request"),
-      ),
+      floatingActionButton: user.isAddict
+          ? FloatingActionButton.extended(
+              onPressed: () {
+                _showDialog(user);
+              },
+              label: Text("Request"),
+            )
+          : null,
       backgroundColor: Color(0xFFD7F5FD),
       body: SingleChildScrollView(
         child: Column(
@@ -200,26 +204,26 @@ class _ConnectState extends State<Connect> {
             ),
             Stack(overflow: Overflow.visible, alignment: Alignment.topCenter, children: [
               Container(
-                height: 300,
                 color: Colors.white,
+                height: 300,
                 child: Container(
-                  margin: EdgeInsets.fromLTRB(5, 35, 5, 20),
+                  margin: EdgeInsets.fromLTRB(5, 50, 5, 20),
                   child: ListView.builder(
                     physics: AlwaysScrollableScrollPhysics(),
                     controller: _controller,
                     scrollDirection: Axis.vertical,
                     padding: const EdgeInsets.all(8),
-                    itemCount: nums.length,
+                    itemCount: trans.length,
                     itemBuilder: (BuildContext context, int index) {
                       return ListTile(
                         leading: CircleAvatar(
-                          child: Text("100"),
+                          child: Text("${trans[index].accAmount}"),
                         ),
                         trailing: CircleAvatar(
-                          child: Icon(Icons.check),
-                          backgroundColor: Colors.green,
+                          child: trans[index].accAmount > 0 ? Icon(Icons.check) : Icon(Icons.clear),
+                          backgroundColor: trans[index].accAmount > 0 ? Colors.green : Colors.red,
                         ),
-                        title: Text("The Remark, req amount"),
+                        title: Text("${trans[index].reason}"),
                       );
                     },
                     // separatorBuilder: (BuildContext context, int index) => const Divider(),
@@ -239,32 +243,14 @@ class _ConnectState extends State<Connect> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Vault",
-                            style: TextStyle(color: Color(0xFFB4C1CA)),
-                          ),
-                          Text(
-                            "20",
-                            style: TextStyle(color: Color(0xFF70D4FF), fontSize: 25),
-                          ),
-                        ],
+                      TSShow(
+                        text: "Vault",
+                        value: c.vault.toString(),
                       ),
-                      Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Friend Vault",
-                            style: TextStyle(color: Color(0xFFB4C1CA)),
-                          ),
-                          Text(
-                            "20",
-                            style: TextStyle(color: Color(0xFF70D4FF), fontSize: 25),
-                          ),
-                        ],
-                      ),
+                      TSShow(
+                        text: "Friend Vault",
+                        value: c.friendVault.toString(),
+                      )
                     ],
                   ),
                 ),
@@ -275,12 +261,13 @@ class _ConnectState extends State<Connect> {
               padding: EdgeInsets.fromLTRB(0, 15, 0, 0),
               decoration: BoxDecoration(
                   gradient: LinearGradient(
-                begin: Alignment.bottomLeft,
-                end: Alignment.topRight, // 10% of the width, so there are ten blinds.
-                colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
-                // tileMode: TileMode.repeated, // repeats the gradient over the canvas
-              )),
-              child: Column(
+                    begin: Alignment.bottomLeft,
+                    end: Alignment.topRight,
+                    colors: [const Color(0xFF21BEFE), const Color(0xFFD7F5FD)], // whitish to gray
+                    // tileMode: TileMode.repeated, // repeats the gradient over the canvas
+                  )),
+              child: !user.isNull && !user.isAddict && !user.requestCompleted
+                  ? Column(
                 children: [
                   Text("Your friend needs ${_getRequestTime(c.requestedAmount)} of extra time.",
                       style: TextStyle(fontSize: 15)),
@@ -344,8 +331,9 @@ class _ConnectState extends State<Connect> {
                     ],
                   )
                 ],
-              ),
-            )
+              )
+                  : null,
+            ),
           ],
         ),
       ),
@@ -483,5 +471,29 @@ class _ConnectState extends State<Connect> {
     //               )
     //   ],
     // ));
+  }
+}
+
+class TSShow extends StatelessWidget {
+  final String text;
+  final String value;
+
+  TSShow({@required this.text, @required this.value});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          this.text,
+          style: TextStyle(color: Color(0xFFB4C1CA)),
+        ),
+        Text(
+          this.value,
+          style: TextStyle(color: Color(0xFF70D4FF), fontSize: 25),
+        ),
+      ],
+    );
   }
 }
