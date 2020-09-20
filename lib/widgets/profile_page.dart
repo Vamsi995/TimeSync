@@ -368,7 +368,7 @@ class _ProfileState extends State<Profile> {
                                 ),
                               )),
                           SizedBox(height: 20),
-                          Text("${user.name}"),
+                          Text("${c.name}"),
                         ],
                       ),
                 decoration: BoxDecoration(
