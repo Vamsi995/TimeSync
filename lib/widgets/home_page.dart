@@ -193,14 +193,14 @@ class _HomeState extends State<Home> {
 
       int totalTime = await getDailyUsage();
 
-
-      Timer.periodic(Duration(days: 1), (Timer t) async {
+      if(DateTime.now().difference(startToday) < Duration(minutes: 15)) {
         Vault.dailySaving();
         CloudUser user = await DataBaseService().getUserDetails();
         if(!LocalUser.normal && user.isAddict) {
           Vault.timeDecay();
         }
-      });
+      }
+
 
       if(user != null && user.isAddict && user.dailyLimit < totalTime)
         NotificationService().sendTimeExceeded();
